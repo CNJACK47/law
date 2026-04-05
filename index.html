@@ -98,22 +98,6 @@
             color: #27ae60;
             font-size: 1.2rem;
         }
-        .btn-export {
-            display: inline-block;
-            padding: 12px 24px;
-            background: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 40px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-export:active { background: #1a2a3a; }
-        .btn-wrapper {
-            text-align: center;
-            margin: 20px 0 0 0;
-        }
         @media (max-width: 640px) {
             body { padding: 12px; }
             .card-header h2 { font-size: 1.2rem; }
@@ -129,13 +113,9 @@
     </div>
     <div id="summary" class="summary" style="display: none;"></div>
     <div id="content"></div>
-    <div class="btn-wrapper" id="btnWrapper" style="display: none;">
-        <button id="exportImageBtn" class="btn-export">📸 保存为图片</button>
-    </div>
     <div class="footer">本报告由系统自动生成，仅供参考。如有疑问请咨询江都区人社局政策法规科。</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
     // ======================= 12个问题的完整内容 =======================
     const questionsData = [
@@ -362,16 +342,13 @@
         const noQuestions = getNoList();
         const contentDiv = document.getElementById('content');
         const summaryDiv = document.getElementById('summary');
-        const btnWrapper = document.getElementById('btnWrapper');
 
         if (noQuestions.length === 0) {
             contentDiv.innerHTML = `<div class="no-result">🎉 恭喜！您的法治体检全部合格，暂无风险项。请继续保持规范管理。</div>`;
             summaryDiv.style.display = 'none';
-            btnWrapper.style.display = 'none';
             return;
         }
 
-        btnWrapper.style.display = 'block';
         summaryDiv.style.display = 'block';
         summaryDiv.innerHTML = `⚠️ 您共有 <strong>${noQuestions.length}</strong> 项需要关注，请仔细阅读以下改进建议。`;
 
@@ -409,34 +386,6 @@
         }
         contentDiv.innerHTML = html;
     }
-
-    // 导出图片功能：只截取 #content 区域（不包含按钮和页脚）
-    document.getElementById('exportImageBtn').addEventListener('click', function() {
-        const element = document.querySelector('#content');
-        const btn = this;
-        const originalText = btn.innerText;
-        btn.innerText = '⏳ 生成中...';
-        btn.disabled = true;
-
-        html2canvas(element, {
-            scale: 2,
-            backgroundColor: '#ffffff',
-            logging: false,
-            useCORS: false
-        }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = '法治体检报告.png';
-            link.href = canvas.toDataURL();
-            link.click();
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }).catch(error => {
-            console.error('截图失败：', error);
-            alert('生成图片失败，请重试或检查网络。');
-            btn.innerText = originalText;
-            btn.disabled = false;
-        });
-    });
 
     render();
 </script>
