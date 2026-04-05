@@ -98,6 +98,22 @@
             color: #27ae60;
             font-size: 1.2rem;
         }
+        .btn-export {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-export:active { background: #1a2a3a; }
+        .btn-wrapper {
+            text-align: center;
+            margin: 20px 0 0 0;
+        }
         @media (max-width: 640px) {
             body { padding: 12px; }
             .card-header h2 { font-size: 1.2rem; }
@@ -113,14 +129,18 @@
     </div>
     <div id="summary" class="summary" style="display: none;"></div>
     <div id="content"></div>
+    <div class="btn-wrapper" id="btnWrapper" style="display: none;">
+        <button id="exportImageBtn" class="btn-export">📸 保存为图片</button>
+    </div>
     <div class="footer">本报告由系统自动生成，仅供参考。如有疑问请咨询江都区人社局政策法规科。</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
-    // ======================= 12个问题的完整内容（与之前相同） =======================
+    // ======================= 12个问题的完整内容 =======================
     const questionsData = [
         { // 问题1
-            title: "一、是否制定劳动人事管理方面的规章制度？",
+            title: "是否制定劳动人事管理方面的规章制度？",
             riskTip: "您的企业没有制定劳动人事管理方面的规章制度",
             riskAnalysis: `劳动人事管理的规章制度是企业对员工进行管理的主要依据。《劳动合同法》及相关法律法规虽然规定了企业某些情况下可以与员工解除劳动合同，但是这些规定并不足以覆盖企业劳动人事管理的方方面面，且企业对员工的管理并不只有解除劳动合同这一项措施。如没有相应制度依据，不利于规范化管理，也容易引发劳动纠纷。
 <br><br>
@@ -141,25 +161,25 @@
 4. 动态更新：根据法律法规变化（如个税改革、假期调整）及时修订制度。`
         },
         { // 问题2
-            title: "二、规章制度是否经过民主程序（经职工代表大会讨论通过、公示学习等）制定？",
+            title: "规章制度是否经过民主程序（经职工代表大会讨论通过、公示学习等）制定？",
             riskTip: "企业依据未经过前述程序制定的规章制度对员工进行管理的，容易引发劳动纠纷",
             riskAnalysis: `依据《劳动合同法》相关规定，企业制定涉及员工切身利益的规章制度或者重大事项时，应当征求职工代表大会(工会)或者全体职工的意见且经过公示后方能对员工生效。企业依据未经过前述程序制定的规章制度对员工进行管理的，容易引发劳动纠纷。企业制定的规章制度违反法律法规规定给员工造成损害的，还应承担赔偿责任。`,
             advice: `企业制定的规章制度涉及员工切身利益的应当征求工会、职工代表大会或全体员工的意见，并且将前述民主程序制定过程通过会议纪要等方式确认。公示的方法有：（1）员工签收；（2）在劳动合同中作为附件；（3）在企业通常公告栏张贴公示（拍照留存，带日期水印）；（4）无纸化办公OA系统、官方网站、公众号推送等。规章制度的修改也要做到公示。`
         },
         { // 问题3
-            title: "三、是否会告知新入职的员工公司已经实施的规章制度？",
+            title: "是否会告知新入职的员工公司已经实施的规章制度？",
             riskTip: "您的企业未告知新入职员工公司已经实施的规章制度",
             riskAnalysis: `劳动人事管理的规章制度是企业对员工进行管理的主要依据，新入职员工如果并不知道该规章制度，不能作为对其管理的依据。`,
             advice: `为避免用工风险，建议企业统一组织新员工学习规章制度，形成会议记录，或者由员工签名确认。`
         },
         { // 问题4
-            title: "四、进行薪酬调整时是否与员工协商？",
+            title: "进行薪酬调整时是否与员工协商？",
             riskTip: "企业调整员工薪酬没有与员工协商，容易侵犯劳动者的合法权益，带来劳动纠纷",
             riskAnalysis: `按照《劳动合同法》和相关规范性文件的规定，企业未按照劳动合同约定支付劳动报酬的，员工可以解除劳动合同，要求企业支付经济补偿金。实践中往往发生企业单方决定调低员工奖励、提成，这也是一种调整员工薪酬的情况，可能引发劳动纠纷。`,
             advice: `劳动合同已经对劳动报酬进行了明确约定，企业不能单方决定调整，如须调整应与员工协商一致，并签署变更劳动合同的补充协议或员工签名确认。公司以制度形式确定了奖励、提成标准的，修改制度也应征求员工意见，形成相应书面记录。`
         },
         { // 问题5
-            title: "五、是否在员工入职之日起一个月内与其签订书面的劳动合同？",
+            title: "是否在员工入职之日起一个月内与其签订书面的劳动合同？",
             riskTip: "您的企业在员工入职之日起一个月内未与其签订书面的劳动合同",
             riskAnalysis: `按照我国《劳动合同法》的规定，企业自用工之日起超过一个月不满一年未与员工订立书面劳动合同的，应当向员工每月支付二倍的工资。同时，因企业未与员工签订书面劳动合同导致员工提出解除劳动关系的，属于企业存在过错行为，企业需要支付员工经济补偿金。此外，企业如拒不改正还将面临相关行政机关的行政处罚。<br><br>
 1. 双倍工资：自用工满一个月的次日起至订立书面劳动合同的前一日（最长支持11个月）需向劳动者支付每月二倍工资。<br>
@@ -175,7 +195,7 @@
 5. 证据留存：保留所有《签订劳动合同通知书》、《终止劳动关系通知书》的送达凭证，以防员工事后主张是企业未签。`
         },
         { // 问题6
-            title: "六、是否全员缴纳社保？",
+            title: "是否全员缴纳社保？",
             riskTip: "您的企业没有全员缴纳社保",
             riskAnalysis: `企业为员工缴纳社会保险属于法律的强制性规定，企业不为员工缴纳社保，面临被行政处罚的风险。特别需要注意的是，按照《工伤保险条例》的规定，未购买工伤保险，如果员工因工受伤，企业须按照工伤保险待遇的标准向员工全额支付相应费用。此外，企业未购买社保，员工可以解除劳动合同，要求企业支付经济补偿金。且在司法实务中，员工即使签署了自愿放弃购买社保的承诺或声明，也无法得到仲裁机构或者法院的认可。<br><br>
 1. 行政查处风险：不办理社会保险登记的，由社会保险行政部门责令限期改正，逾期不改正的，对用人单位处应缴社保费数额1倍以上3倍以下罚款。瞒报工资总额/职工人数的，处瞒报工资数额1倍以上3倍以下罚款。<br>
@@ -195,7 +215,7 @@
 4. 建立台账与提醒机制：建立《社保缴纳台账》，对新入职员工设置参保提醒，确保当月增减员操作及时。`
         },
         { // 问题7
-            title: "七、是否在规定时间内足额发放员工工资？",
+            title: "是否在规定时间内足额发放员工工资？",
             riskTip: "未及时足额支付劳动报酬，容易引发劳动纠纷",
             riskAnalysis: `1. 劳动监察查处风险：劳动者投诉后，劳动监察部门将责令限期支付；逾期不支付的，面临行政处理及罚款，拒不履行行政处理决定的，可处2000元以上2万元以下罚款，逾期不缴纳罚款的，每日按罚款数额的3%加处罚款。<br>
 2. 员工解约索赔风险：员工可以“未及时足额支付劳动报酬”为由随时解除劳动合同，并要求企业支付经济补偿金。<br>
@@ -212,7 +232,7 @@
 6. 收到责令文书后的应对：如收到劳动监察部门的《限期改正指令书》，应在规定期限内足额支付工资，避免产生50%-100%的加付赔偿金和行政处罚。`
         },
         { // 问题8
-            title: "八、是否按照规定给加班员工安排补休和支付加班工资？",
+            title: "是否按照规定给加班员工安排补休和支付加班工资？",
             riskTip: "您的企业没有按照规定给加班员工安排补休和支付加班工资",
             riskAnalysis: `1. 加班费补付+赔偿金风险：未依法支付加班费，劳动监察部门可责令限期支付，逾期不支付的，需加付赔偿金（应付金额50%以上100%以下）。<br>
 2. 员工解约索赔风险：员工可以“未及时足额支付劳动报酬”（包括加班费）为由解除劳动合同，并要求企业支付经济补偿金。<br>
@@ -234,7 +254,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;②实行综合工时制工作制的岗位，周期内总工时超过法定标准的，超过部分按150%支付；法定节假日仍需按300%支付。实行不定时工作制的岗位，不适用加班工资的支付规定。`
         },
         { // 问题9
-            title: "九、是否按规定安排员工享受带薪年休假？",
+            title: "是否按规定安排员工享受带薪年休假？",
             riskTip: "未按规定安排员工享受带薪年休假",
             riskAnalysis: `1. 未休年假补偿风险：未安排休年假，应按日工资收入的300%支付未休年休假工资报酬，其中包含正常工作期间的工资收入（即额外支付200%）。<br>
 日工资=月工资收入÷21.75天<br>
@@ -264,7 +284,7 @@
 9. 与春秋假衔接：提前了解当地春秋假具体时间，主动摸排家有中小学子女职工的休假需求，结合生产计划提前制定春秋假期间休假安排，优先审批家有中小学子女职工的带薪年休假申请，支持职工将带薪年休假进行灵活拆分，与春秋假、法定节假日、周末休息日有机衔接，形成更长假期，满足职工陪伴子女的需求。`
         },
         { // 问题10
-            title: "十、与员工约定的试用期是否超过法律规定的期限？",
+            title: "与员工约定的试用期是否超过法律规定的期限？",
             riskTip: "您的企业与员工约定的试用期超过法律规定的期限",
             riskAnalysis: `按照《劳动合同法》规定，超出法定期限的试用期约定无效，法定试用期届满视为员工自动转正；同时，企业须以员工试用期满月工资为标准，按已经履行的超过法定试用期的期间向劳动者支付赔偿金。试用期工资低于转正工资80%的，需补足差额。在试用期内，除发生法定可以解除劳动合同的情形外，企业也不得随意解除劳动合同，否则为违法解除，员工可以要求企业支付赔偿金。同一劳动者只能约定一次试用期，延长试用期属于二次约定，同样违法。`,
             advice: `企业与员工签署劳动合同时应当明确录用条件，不可随意解除劳动合同。<br><br>
@@ -281,7 +301,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;• 用人单位所在地最低工资标准`
         },
         { // 问题11
-            title: "十一、聘用新员工时是否向新员工确认与用人单位不存在竞业限制约定或未在其他单位兼职的情况？",
+            title: "聘用新员工时是否向新员工确认与用人单位不存在竞业限制约定或未在其他单位兼职的情况？",
             riskTip: "不了解员工是否存在竞业限制或兼职，容易泄露商业秘密，带来法律纠纷",
             riskAnalysis: `员工如果违反在原用人单位的竞业限制义务，原用人单位可以向企业索赔；员工未经允许兼职，可能侵犯原用人单位的商业秘密，同样容易引来不必要的纠纷。<br><br>
 1. 连带赔偿责任：招用与原单位有竞业限制约定的员工，可能构成侵犯商业秘密的共同侵权，需承担连带赔偿责任。<br>
@@ -299,7 +319,7 @@
 4. 与规章制度衔接：在《员工手册》中明确双重劳动关系、兼职的界定标准和处理措施，为后续管理提供制度依据。`
         },
         { // 问题12
-            title: "十二、与员工解除或终止劳动合同是否出具了书面证明并送达员工？",
+            title: "与员工解除或终止劳动合同是否出具了书面证明并送达员工？",
             riskTip: "企业解除劳动合同没有及时出具书面证明并送达解除通知，容易引发劳动纠纷",
             riskAnalysis: `按照《劳动合同法》的规定，企业应当在解除或者终止劳动合同时出具解除或者终止劳动合同的证明，并在十五日内为员工办理档案和社会保险关系转移手续。如果企业没有履行前述义务给员工造成损害的，应当承担赔偿责任。除此之外，对严重违反企业规章制度的员工，企业如果解除劳动合同而没有及时送达解除合同通知的，容易引发劳动纠纷，使企业处于被动位置。<br><br>
 1. 未出具证明的赔偿责任：未在法定时限内出具解除证明，导致员工无法办理失业登记、入职新单位等，需承担赔偿责任。<br>
@@ -329,12 +349,11 @@
         }
     ];
 
-    // 获取 URL 中的 no 参数（例如 ?no=1,2,12）
+    // 获取 URL 中的 no 参数
     function getNoList() {
         const urlParams = new URLSearchParams(window.location.search);
         const noParam = urlParams.get('no');
         if (!noParam) return [];
-        // 解析逗号分隔的数字，过滤无效值
         return noParam.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n) && n >= 1 && n <= 12);
     }
 
@@ -343,23 +362,32 @@
         const noQuestions = getNoList();
         const contentDiv = document.getElementById('content');
         const summaryDiv = document.getElementById('summary');
+        const btnWrapper = document.getElementById('btnWrapper');
 
         if (noQuestions.length === 0) {
             contentDiv.innerHTML = `<div class="no-result">🎉 恭喜！您的法治体检全部合格，暂无风险项。请继续保持规范管理。</div>`;
             summaryDiv.style.display = 'none';
+            btnWrapper.style.display = 'none';
             return;
         }
 
+        btnWrapper.style.display = 'block';
         summaryDiv.style.display = 'block';
         summaryDiv.innerHTML = `⚠️ 您共有 <strong>${noQuestions.length}</strong> 项需要关注，请仔细阅读以下改进建议。`;
 
         let html = '';
+        let displayIndex = 1;
+        const chineseNumbers = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+
         for (let idx of noQuestions) {
             const q = questionsData[idx-1];
+            const numberText = (displayIndex <= 12) ? chineseNumbers[displayIndex] : displayIndex.toString();
+            const dynamicTitle = `${numberText}、${q.title}`;
+
             html += `
                 <div class="card">
                     <div class="card-header">
-                        <h2>${q.title}</h2>
+                        <h2>${dynamicTitle}</h2>
                     </div>
                     <div class="card-body">
                         <div class="risk-tip">
@@ -377,9 +405,38 @@
                     </div>
                 </div>
             `;
+            displayIndex++;
         }
         contentDiv.innerHTML = html;
     }
+
+    // 导出图片功能：只截取 #content 区域（不包含按钮和页脚）
+    document.getElementById('exportImageBtn').addEventListener('click', function() {
+        const element = document.querySelector('#content');
+        const btn = this;
+        const originalText = btn.innerText;
+        btn.innerText = '⏳ 生成中...';
+        btn.disabled = true;
+
+        html2canvas(element, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: false
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = '法治体检报告.png';
+            link.href = canvas.toDataURL();
+            link.click();
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }).catch(error => {
+            console.error('截图失败：', error);
+            alert('生成图片失败，请重试或检查网络。');
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+    });
 
     render();
 </script>
